@@ -1,0 +1,59 @@
+# 交叉检验
+#引用
+from sklearn import datasets
+from sklearn.model_selection import KFold
+import matplotlib.pyplot as plt
+%matplotlib inline
+import numpy as mp 
+import pandas as pd
+
+#用 load_wind方法导入数据
+wine_data = datasets.load_wine()
+print(wine_data.feature_names)
+data_input = wine_data.data
+data_output = wine_data.target
+
+#观察数据
+#data _input
+#data_output
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score,log_loss,classification_report
+
+#分成4份， shuffle 代表混合一下，结果更随机，混合均匀
+kf = KFold(4, shuffle = True)
+kf.get_n_splits(data_input)
+lr = LogisticRegression()
+
+for train_index,test_index in kf.split(data_input,data_output):
+    #把训练集数据和标签喂给lr做拟合
+    lr.fit(data_input[train_index],data_output[train_index])
+    y_pre_lr = lr.predict(data_input[test_index])
+    y = data_output[test_index]
+    #再把预测后的结果和原来的结果做比较，并且计算F1_SCORE
+    print(f1_score(y,y_pre_lr,average=None))
+    
+## 对比不同模型的cross-validation 结果
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn import svm
+from sklearn.model_selection import cross_val_score
+rf_class = RandomForestClassifier(n_estimators =10)
+log_class = LogisticRegression()
+svm_class = svm.LinearSVC()
+
+#creoss_val_score?
+
+#scoring 是 用什么方法， CV代表分成几份
+print(cross_val_score(rf_class,data_input,data_output,scoring='accuracy',cv =4))
+
+#计算平均值
+accuracy = cross_val_score(rf_class,data_input,data_output,scoring='accuracy',cv =4).mean()*100
+print('Accuracy of Random Forests is:',accuracy)
+accuracy = cross_val_score(log_class,data_input,data_output,scoring='accuracy',cv =4).mean()*100
+print('Accuracy of logistic is:',accuracy)
+accuracy = cross_val_score(svm_class,data_input,data_output,scoring='accuracy',cv =4).mean()*100
+print('Accuracy of SVM is:',accuracy)
+
+
